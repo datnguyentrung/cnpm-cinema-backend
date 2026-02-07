@@ -1,0 +1,49 @@
+package com.dat.cnpm_btl.domain.ticketing;
+
+import com.dat.cnpm_btl.enums.ticketing.ProductType;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(
+        name = "product",
+        schema = "ticketing",
+        indexes = {
+                @Index(name = "idx_product_type", columnList = "type"),
+                @Index(name = "idx_product_active", columnList = "is_active")
+        }
+)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id", nullable = false)
+    Integer productId;
+
+    @Column(name = "name", nullable = false)
+    String name; // Tên sản phẩm (VD: Bắp phô mai, Coca lớn)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    ProductType type; // Phân loại (FOOD, DRINK, COMBO)
+
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    BigDecimal price; // Giá bán niêm yết
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    String description; // Mô tả (VD: Bao gồm 1 Bắp + 2 Nước)
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    Boolean isActive = true; // Còn bán hay ngừng kinh doanh
+
+}
