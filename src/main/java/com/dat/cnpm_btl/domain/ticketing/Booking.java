@@ -26,9 +26,7 @@ import java.util.UUID;
         schema = "ticketing",
         indexes = {
                 @Index(name = "idx_booking_user", columnList = "user_id"),
-                @Index(name = "idx_booking_showtime", columnList = "showtime_id"),
-                @Index(name = "idx_booking_status", columnList = "status"),
-                @Index(name = "idx_booking_created", columnList = "created_at")
+                @Index(name = "idx_booking_status", columnList = "status")
         }
 )
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -48,14 +46,6 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     User user;
-
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "showtime_id", nullable = false)
-    UUID showtimeId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "showtime_id", referencedColumnName = "showtime_id", insertable = false, updatable = false)
-    ShowTime showtime;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

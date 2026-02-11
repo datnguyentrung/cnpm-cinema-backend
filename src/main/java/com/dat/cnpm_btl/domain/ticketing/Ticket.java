@@ -57,7 +57,7 @@ public class Ticket {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "showtime_id", referencedColumnName = "showtime_id", insertable = false, updatable = false)
-    ShowTime showtime;
+    Showtime showtime;
 
     @Column(name = "seat_id", nullable = false)
     Integer seatId;

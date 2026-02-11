@@ -34,7 +34,7 @@ import java.util.UUID;
         }
 )
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ShowTime {
+public class Showtime {
 
     @Id
     @GeneratedValue(generator = "uuid-hibernate-generator")

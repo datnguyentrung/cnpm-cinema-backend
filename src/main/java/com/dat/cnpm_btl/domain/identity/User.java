@@ -63,7 +63,7 @@ public class User {
     // FetchType.EAGER: Lấy luôn Role khi query User (tiện cho Spring Security)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false) // Khóa ngoại liên kết
-            Role role;
+    Role role;
 
     // --- AUDITING FIELDS (Tự động) ---
 

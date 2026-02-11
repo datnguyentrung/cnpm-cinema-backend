@@ -1,0 +1,55 @@
+package com.dat.cnpm_btl.service.identity;
+
+import com.dat.cnpm_btl.domain.identity.User;
+import lombok.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+
+@Component("userDetailsService")
+public class UserDetailCustom implements UserDetailsService {
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * Load user details by phone number for Spring Security authentication
+     *
+     * @param phoneNumber the phone number identifying the user
+     * @return UserDetails object containing user authentication information
+     * @throws UsernameNotFoundException if user is not found or account is not active
+     */
+    @Override
+    public UserDetails loadUserByUsername(@NonNull String phoneNumber) throws UsernameNotFoundException {
+        User user = userService.getUserByPhoneNumber(phoneNumber);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with phone number: " + phoneNumber);
+        }
+
+        // Check if user account is active and not banned/deactivated
+        boolean isAccountNonLocked = user.getIsActive() != Boolean.FALSE;
+        boolean isEnabled = user.getIsActive() == Boolean.TRUE;
+
+        // Build authorities from user role (Role.code already contains "ROLE_" prefix)
+        SimpleGrantedAuthority authority = user.getRole() != null
+                ? new SimpleGrantedAuthority(user.getRole().getId())
+                : new SimpleGrantedAuthority("ROLE_USER");
+
+        // Use Spring Security's User class with builder pattern to avoid confusion with entity User
+        return org.springframework.security.core.userdetails.User
+                .withUsername(phoneNumber)
+                .password(user.getPassword())
+                .authorities(Collections.singletonList(authority))
+                .accountExpired(false)
+                .accountLocked(!isAccountNonLocked)
+                .credentialsExpired(false)
+                .disabled(!isEnabled)
+                .build();
+    }
+}
