@@ -22,4 +22,10 @@ public class SeatService {
         List<Seat> seats = seatRepository.findByRoomIdAndIsActive(roomId, true);
         return seatMapper.toSeatResponseList(seats);
     }
+
+    public List<SeatDTO.SeatResponse> getSeatsByRoomIdAndSeatIds(Integer roomId, List<Integer> seatIds) {
+        log.info("Fetching seats for seatIds: {}", seatIds);
+        List<Seat> seats = seatRepository.findByRoomIdAndSeatIdInAndIsActive(roomId, seatIds, true);
+        return seatMapper.toSeatResponseList(seats);
+    }
 }
