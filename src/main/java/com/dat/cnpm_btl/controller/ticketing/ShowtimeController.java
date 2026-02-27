@@ -5,10 +5,10 @@ import com.dat.cnpm_btl.service.ticketing.ShowtimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,6 +21,14 @@ public class ShowtimeController {
     public ResponseEntity<ShowtimeDTO.ShowTimeWithSeatsResponse> getShowtimeWithSeats(@PathVariable String showtimeId) {
         log.info("Getting showtime with seats for showtimeId: {}", showtimeId);
         ShowtimeDTO.ShowTimeWithSeatsResponse response = showtimeService.getShowtimeWithSeats(showtimeId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ShowtimeDTO.ShowtimeResponse>> getShowTimeResponseByFilter(
+            @RequestParam LocalDate date) {
+        log.info("Getting showtimes for date: {}", date);
+        List<ShowtimeDTO.ShowtimeResponse> response = showtimeService.getShowTimeResponseByDate(date);
         return ResponseEntity.ok(response);
     }
 }

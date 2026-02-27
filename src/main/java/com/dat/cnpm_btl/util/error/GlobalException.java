@@ -62,8 +62,8 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<RestResponse<Object>> handleUserNotFound(UserNotFoundException ex) {
+    @ExceptionHandler({UserNotFoundException.class, ResourceNotFoundException.class})
+    public ResponseEntity<RestResponse<Object>> handleNotFound(RuntimeException ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.NOT_FOUND.value());
         res.setError(ex.getClass().getSimpleName());

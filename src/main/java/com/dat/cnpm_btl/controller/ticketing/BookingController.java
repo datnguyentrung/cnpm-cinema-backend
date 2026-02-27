@@ -26,8 +26,9 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public ResponseEntity<RestResponse<List<TicketDTO.TicketResponse>>> createBooking(
+    public ResponseEntity<List<TicketDTO.TicketResponse>> createBooking(
             @Valid @RequestBody BookingDTO.BookSeatsRequest request) {
+
         log.info("REST: Booking {} seats for showtime: {}", request.getSeatIds().size(), request.getShowtimeId());
 
         List<TicketDTO.TicketResponse> tickets = bookingService.bookSeats(
@@ -35,12 +36,7 @@ public class BookingController {
                 request.getSeatIds()
         );
 
-        RestResponse<List<TicketDTO.TicketResponse>> response = new RestResponse<>();
-        response.setStatusCode(HttpStatus.CREATED.value());
-        response.setMessage("Seats booked successfully. Booking will expire in 10 minutes.");
-        response.setData(tickets);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tickets);
     }
 
 }

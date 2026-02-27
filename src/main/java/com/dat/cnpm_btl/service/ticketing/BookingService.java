@@ -1,5 +1,6 @@
 package com.dat.cnpm_btl.service.ticketing;
 
+import com.dat.cnpm_btl.config.ShowtimeWebSocketHandler;
 import com.dat.cnpm_btl.domain.ticketing.Booking;
 import com.dat.cnpm_btl.dto.catalog.SeatDTO;
 import com.dat.cnpm_btl.dto.ticketing.ShowtimeDTO;
@@ -33,6 +34,8 @@ public class BookingService {
     private final TicketService ticketService;
 
     private final SeatService seatService;
+
+    private final ShowtimeWebSocketHandler webSocketHandler;
 
     @Transactional
     public List<TicketDTO.TicketResponse> bookSeats(String showtimeId, List<Integer> seatIds){
@@ -94,6 +97,9 @@ public class BookingService {
 
         log.info("Successfully created booking {} with {} tickets for showtime {}",
                 savedBooking.getBookingId(), tickets.size(), showtimeId);
+
+        // Broadcast real-time seat update to all WebSocket clients watching this showtime
+        webSocketHandler.broadcastSeatUpdate(showtimeId, seatIds);
 
         return tickets;
     }

@@ -8,6 +8,7 @@ import com.dat.cnpm_btl.enums.ticketing.TicketStatus;
 import com.dat.cnpm_btl.mapper.catalog.SeatMapper;
 import com.dat.cnpm_btl.mapper.ticketing.TicketMapper;
 import com.dat.cnpm_btl.repository.ticketing.TicketRepository;
+import com.dat.cnpm_btl.service.catalog.SeatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.dat.cnpm_btl.util.TicketUtil.generateTicketCode;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,6 +30,7 @@ public class TicketService {
     private final SeatMapper seatMapper;
 
     private final TicketMapper ticketMapper;
+    private final SeatService seatService;
 
     public List<SeatDTO.SeatResponse> getBookedSeatsByShowtimeId(String showtimeId) {
         List<Seat> bookedSeats = ticketRepository.findSeatsByShowtime_ShowtimeIdAndStatusIn(UUID.fromString(showtimeId),
@@ -40,7 +44,9 @@ public class TicketService {
         log.info("Creating ticket for booking: {}, showtime: {}, seat: {}",
                 request.getBookingId(), request.getShowtimeId(), request.getSeatId());
 
-        String ticketCode = generateTicketCode();
+        SeatDTO.SeatResponse seat = seatService.getSeatById(request.getSeatId());
+
+        String ticketCode = generateTicketCode(seat.getSeatType().getPrefix());
 
         Ticket ticket = Ticket.builder()
                 .bookingId(UUID.fromString(request.getBookingId()))
@@ -66,13 +72,15 @@ public class TicketService {
         UUID bookingId = UUID.fromString(request.getBookingId());
         UUID showtimeId = UUID.fromString(request.getShowtimeId());
 
-        for (Integer seatId : request.getSeatIds()) {
-            String ticketCode = generateTicketCode();
+        List<SeatDTO.SeatResponse> seatResponses = seatService.getSeatsByIds(request.getSeatIds());
+
+        for (SeatDTO.SeatResponse seatResponse : seatResponses) {
+            String ticketCode = generateTicketCode(seatResponse.getSeatType().getPrefix());
 
             Ticket ticket = Ticket.builder()
                     .bookingId(bookingId)
                     .showtimeId(showtimeId)
-                    .seatId(seatId)
+                    .seatId(seatResponse.getSeatId())
                     .ticketCode(ticketCode)
                     .price(request.getPrice())
                     .status(request.getStatus() != null ? request.getStatus() : TicketStatus.HOLD)
@@ -198,14 +206,5 @@ public class TicketService {
 
         ticketRepository.deleteAll(tickets);
         log.info("Deleted {} tickets for booking {}", tickets.size(), bookingId);
-    }
-
-    // UTILITY - Generate unique ticket code
-    private String generateTicketCode() {
-        // Format: TKT-TIMESTAMP-RANDOM
-        // Example: TKT-20240222150530-A1B2
-        String timestamp = String.valueOf(System.currentTimeMillis()).substring(5);
-        String randomPart = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
-        return String.format("TKT-%s-%s", timestamp, randomPart);
     }
 }
