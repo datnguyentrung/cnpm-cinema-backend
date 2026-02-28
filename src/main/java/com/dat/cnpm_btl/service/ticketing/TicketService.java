@@ -9,6 +9,8 @@ import com.dat.cnpm_btl.mapper.catalog.SeatMapper;
 import com.dat.cnpm_btl.mapper.ticketing.TicketMapper;
 import com.dat.cnpm_btl.repository.ticketing.TicketRepository;
 import com.dat.cnpm_btl.service.catalog.SeatService;
+import com.dat.cnpm_btl.util.error.TicketAlreadyUsedException;
+import com.dat.cnpm_btl.util.error.TicketNotPaidException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class TicketService {
     private final SeatMapper seatMapper;
 
     private final TicketMapper ticketMapper;
+
     private final SeatService seatService;
 
     public List<SeatDTO.SeatResponse> getBookedSeatsByShowtimeId(String showtimeId) {
@@ -134,25 +137,39 @@ public class TicketService {
 
     // UPDATE - Change ticket status (PATCH)
     @Transactional
-    public TicketDTO.TicketResponse updateTicketStatus(String ticketId, TicketStatus newStatus) {
-        log.info("Updating ticket {} status to {}", ticketId, newStatus);
+    public TicketDTO.TicketDetailResponse updateTicketStatus(String ticketCode, TicketStatus newStatus) {
+        log.info("Updating ticket {} status to {}", ticketCode, newStatus);
 
-        Ticket ticket = ticketRepository.findById(UUID.fromString(ticketId))
-                .orElseThrow(() -> new IllegalArgumentException("Ticket not found with ID: " + ticketId));
+        Ticket ticket = ticketRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found with CODE: " + ticketCode));
 
-        TicketStatus oldStatus = ticket.getStatus();
+        TicketStatus currentStatus = ticket.getStatus();
+
+        if (newStatus == TicketStatus.USED) {
+            // Vé đã được quét rồi
+            if (currentStatus == TicketStatus.USED) {
+                throw new TicketAlreadyUsedException(ticketCode, ticket.getCheckInTime(),
+                        ticketMapper.toTicketDetailResponse(ticket));
+            }
+            // Vé chưa thanh toán (HOLD) hoặc đã hủy (CANCELLED) — không được vào rạp
+            if (currentStatus != TicketStatus.PAID) {
+                throw new TicketNotPaidException(ticketCode, currentStatus,
+                        ticketMapper.toTicketDetailResponse(ticket));
+            }
+        }
+
         ticket.setStatus(newStatus);
 
         // If status is USED, set check-in time
         if (newStatus == TicketStatus.USED && ticket.getCheckInTime() == null) {
             ticket.setCheckInTime(Instant.now());
-            log.info("Set check-in time for ticket {}", ticketId);
+            log.info("Set check-in time for ticket {}", ticketCode);
         }
 
         Ticket updatedTicket = ticketRepository.save(ticket);
-        log.info("Ticket {} status changed from {} to {}", ticketId, oldStatus, newStatus);
+        log.info("Ticket {} status changed from {} to {}", ticketCode, currentStatus, newStatus);
 
-        return ticketMapper.toTicketResponse(updatedTicket);
+        return ticketMapper.toTicketDetailResponse(updatedTicket);
     }
 
     // UPDATE - Bulk update ticket status by booking ID

@@ -14,10 +14,18 @@ import java.util.List;
 )
 public interface TicketMapper {
 
-    @Mapping(target = "ticketId", expression = "java(ticket.getTicketId() != null ? ticket.getTicketId().toString() : null)")
-    @Mapping(target = "bookingId", expression = "java(ticket.getBookingId() != null ? ticket.getBookingId().toString() : null)")
-    @Mapping(target = "showtimeId", expression = "java(ticket.getShowtimeId() != null ? ticket.getShowtimeId().toString() : null)")
+    @Mapping(target = "ticketId", source = "ticketId")
+    @Mapping(target = "bookingId", source = "bookingId")
+    @Mapping(target = "showtimeId", source = "showtimeId")
     TicketDTO.TicketResponse toTicketResponse(Ticket ticket);
+
+    @Mapping(target = "seatRow", source = "seat.rowLabel")
+    @Mapping(target = "seatNumber", source = "ticket.seat.seatNumber")
+    @Mapping(target = "movieTitle", source = "ticket.showtime.movie.title")
+    @Mapping(target = "roomName", source = "ticket.showtime.room.name")
+    @Mapping(target = "showtimeStart", source = "ticket.showtime.startTime")
+    @Mapping(target = "showtimeEnd", source = "ticket.showtime.endTime")
+    TicketDTO.TicketDetailResponse toTicketDetailResponse(Ticket ticket);
 
     List<TicketDTO.TicketResponse> toTicketResponseList(List<Ticket> tickets);
 }

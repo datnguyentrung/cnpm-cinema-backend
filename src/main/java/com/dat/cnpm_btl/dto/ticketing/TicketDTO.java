@@ -35,10 +35,9 @@ public class TicketDTO {
     @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class TicketDetailResponse {
-        String ticketId;
-        String bookingId;
-        String showtimeId;
-        Integer seatId;
+//        String bookingId;
+//        String showtimeId;
+//        Integer seatId;
         String seatRow;
         Integer seatNumber;
         String ticketCode;

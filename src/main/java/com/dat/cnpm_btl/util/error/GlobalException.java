@@ -82,4 +82,25 @@ public class GlobalException {
 
         return ResponseEntity.status(ex.getStatusCode()).body(res);
     }
+
+    @ExceptionHandler(TicketAlreadyUsedException.class)
+    public ResponseEntity<RestResponse<Object>> handleTicketAlreadyUsed(TicketAlreadyUsedException ex) {
+        RestResponse<Object> response = new RestResponse<>();
+        response.setStatusCode(HttpStatus.CONFLICT.value()); // 409
+        response.setMessage("ALREADY_USED");
+        response.setData(ex.getTicketDetail());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(TicketNotPaidException.class)
+    public ResponseEntity<RestResponse<Object>> handleTicketNotPaid(TicketNotPaidException ex) {
+        RestResponse<Object> response = new RestResponse<>();
+        response.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value()); // 422
+        response.setError("TicketNotPaidException");
+        response.setMessage("TICKET_NOT_PAID");
+        response.setData(ex.getTicketDetail());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
 }

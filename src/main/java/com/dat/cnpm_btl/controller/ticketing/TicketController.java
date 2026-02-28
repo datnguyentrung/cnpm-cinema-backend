@@ -4,12 +4,14 @@ import com.dat.cnpm_btl.dto.RestResponse;
 import com.dat.cnpm_btl.dto.ticketing.TicketDTO;
 import com.dat.cnpm_btl.enums.ticketing.TicketStatus;
 import com.dat.cnpm_btl.service.ticketing.TicketService;
+import com.dat.cnpm_btl.util.TicketUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -126,16 +128,21 @@ public class TicketController {
     }
 
     // UPDATE - Change ticket status (PATCH)
-    @PatchMapping("/{ticketId}/status")
-    public ResponseEntity<RestResponse<TicketDTO.TicketResponse>> updateTicketStatus(
-            @PathVariable String ticketId,
+    @PatchMapping("/{ticketCode}/status")
+        public ResponseEntity<RestResponse<TicketDTO.TicketDetailResponse>> updateTicketStatus(
+            @PathVariable String ticketCode,
             @Valid @RequestBody TicketDTO.UpdateTicketStatusRequest request) {
-        log.info("REST: Updating ticket {} status to {}", ticketId, request.getStatus());
-        TicketDTO.TicketResponse ticket = ticketService.updateTicketStatus(ticketId, request.getStatus());
+        log.info("REST: Updating ticket {} status to {}", ticketCode, request.getStatus());
+        if (!TicketUtil.validateTicketCode(ticketCode)) {
+            log.warn("Invalid ticket code provided: {}", ticketCode);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ticket code: " + ticketCode);
+        }
 
-        RestResponse<TicketDTO.TicketResponse> response = new RestResponse<>();
+        TicketDTO.TicketDetailResponse ticket = ticketService.updateTicketStatus(ticketCode, request.getStatus());
+
+        RestResponse<TicketDTO.TicketDetailResponse> response = new RestResponse<>();
         response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Ticket status updated successfully");
+        response.setMessage("SUCCESS");
         response.setData(ticket);
 
         return ResponseEntity.ok(response);

@@ -15,7 +15,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(showtimeWebSocketHandler, "/ws/showtime/**")
+        registry.addHandler(showtimeWebSocketHandler, "/ws/showtime/*")
                 .setAllowedOrigins(
                         "http://localhost:3000",
                         "http://localhost:4173",
