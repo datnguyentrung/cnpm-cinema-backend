@@ -1,3 +1,4 @@
+/*
 package com.dat.cnpm_btl.enums.catalog;
 
 import lombok.Getter;
@@ -14,3 +15,4 @@ public enum SeatType {
     // Thuộc tính lưu trữ mã viết tắt
     private final String prefix;
 }
+*/

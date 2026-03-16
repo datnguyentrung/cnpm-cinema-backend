@@ -10,19 +10,16 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "genre",
-        schema = "catalog"
-)
+@Table(name = "genre", schema = "catalog")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Genre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "genre_id", nullable = false)
-    Integer genreId;
+    Integer id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", length = 100)
     String name; // Tên thể loại (Hành động, Tình cảm...)
 
 }

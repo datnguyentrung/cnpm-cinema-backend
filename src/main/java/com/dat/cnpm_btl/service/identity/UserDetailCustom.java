@@ -38,13 +38,13 @@ public class UserDetailCustom implements UserDetailsService {
 
         // Build authorities from user role (Role.code already contains "ROLE_" prefix)
         SimpleGrantedAuthority authority = user.getRole() != null
-                ? new SimpleGrantedAuthority(user.getRole().getId())
+                ? new SimpleGrantedAuthority(user.getRole().getId().toString())
                 : new SimpleGrantedAuthority("ROLE_USER");
 
         // Use Spring Security's User class with builder pattern to avoid confusion with entity User
         return org.springframework.security.core.userdetails.User
                 .withUsername(phoneNumber)
-                .password(user.getPassword())
+                .password(user.getPasswordHash())
                 .authorities(Collections.singletonList(authority))
                 .accountExpired(false)
                 .accountLocked(!isAccountNonLocked)

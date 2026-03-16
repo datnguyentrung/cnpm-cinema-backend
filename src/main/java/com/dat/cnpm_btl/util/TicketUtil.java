@@ -47,7 +47,7 @@ public class TicketUtil {
         String signature = calculateSignature(randomPart);
 
         // 8. Dùng String.join thay vì String.format (String.join xử lý gộp chuỗi bằng ký tự phân cách nhanh hơn)
-        return String.join(SEPARATOR, prefix.toUpperCase(), randomPart, signature);
+        return String.join(SEPARATOR, prefix.substring(0, 3).toUpperCase(), randomPart, signature);
     }
 
     private static String calculateSignature(String randomPart) {

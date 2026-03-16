@@ -16,14 +16,14 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Query("""
             SELECT t.seat
             FROM Ticket t
-            WHERE t.showtime.showtimeId = :showtimeShowtimeId
+            WHERE t.booking.showtime.id = :showtimeShowtimeId
                 AND t.status IN :ticketStatus
     """)
-    List<Seat> findSeatsByShowtime_ShowtimeIdAndStatusIn(UUID showtimeShowtimeId, List<TicketStatus> ticketStatus);
+    List<Seat> findSeatsByShowtime_ShowtimeIdAndStatusIn(String showtimeShowtimeId, List<TicketStatus> ticketStatus);
 
-    List<Ticket> findByBookingId(UUID bookingId);
+    List<Ticket> findByBooking_Id(UUID bookingId);
 
-    List<Ticket> findByShowtimeId(UUID showtimeId);
+    List<Ticket> findByBooking_Showtime_Id(String booking_showtime_id);
 
     List<Ticket> findByStatus(TicketStatus status);
 
@@ -32,8 +32,8 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Query("""
             SELECT t
             FROM Ticket t
-            WHERE t.bookingId = :bookingId
+            WHERE t.booking.id = :bookingId
                 AND t.status = :status
     """)
-    List<Ticket> findByBookingIdAndStatus(UUID bookingId, TicketStatus status);
+    List<Ticket> findByBooking_IdAndStatus(UUID bookingId, TicketStatus status);
 }

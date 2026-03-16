@@ -4,16 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -29,21 +23,18 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
-    @GeneratedValue(generator = "uuid-hibernate-generator")
-    @UuidGenerator
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "user_id", updatable = false, nullable = false)
-    UUID userId;
+    @Column(name = "user_id", updatable = false, nullable = false, length = 36)
+    String id;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     String fullName;
 
     // Mật khẩu hash, không được null
     @Column(name = "password_hash", nullable = false)
-    String password;
+    String passwordHash;
 
     // Số điện thoại là định danh đăng nhập -> Unique và Not Null
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true, length = 20)
     String phoneNumber;
 
     // Email có thể null (nếu người dùng chưa cập nhật) nhưng nếu có thì phải Unique
@@ -59,19 +50,15 @@ public class User {
     Boolean isActive = true;
 
     // --- QUAN HỆ VỚI BẢNG ROLE ---
-    // Giả sử bạn đã có entity Role. Nếu chưa, bạn cần tạo Entity Role trước.
-    // FetchType.EAGER: Lấy luôn Role khi query User (tiện cho Spring Security)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false) // Khóa ngoại liên kết
     Role role;
 
     // --- AUDITING FIELDS (Tự động) ---
 
-    @CreatedDate // Tự động lấy thời gian hiện tại khi insert
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     Instant createdAt;
 
-    @LastModifiedDate // Tự động cập nhật thời gian khi update
     @Column(name = "updated_at")
     Instant updatedAt;
 

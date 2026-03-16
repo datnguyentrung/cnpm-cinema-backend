@@ -14,7 +14,7 @@ import java.util.List;
 )
 public interface RoomMapper {
 
-    @Mapping(source = "roomId", target = "roomId")
+    @Mapping(source = "id", target = "roomId")
     @Mapping(source = "name", target = "roomName")
     @Mapping(source = "totalRows", target = "totalRows")
     @Mapping(source = "totalCols", target = "totalCols")

@@ -1,12 +1,14 @@
 package com.dat.cnpm_btl.service.ticketing;
 
 import com.dat.cnpm_btl.domain.catalog.Seat;
+import com.dat.cnpm_btl.domain.ticketing.Booking;
 import com.dat.cnpm_btl.domain.ticketing.Ticket;
 import com.dat.cnpm_btl.dto.catalog.SeatDTO;
 import com.dat.cnpm_btl.dto.ticketing.TicketDTO;
 import com.dat.cnpm_btl.enums.ticketing.TicketStatus;
 import com.dat.cnpm_btl.mapper.catalog.SeatMapper;
 import com.dat.cnpm_btl.mapper.ticketing.TicketMapper;
+import com.dat.cnpm_btl.repository.ticketing.BookingRepository;
 import com.dat.cnpm_btl.repository.ticketing.TicketRepository;
 import com.dat.cnpm_btl.service.catalog.SeatService;
 import com.dat.cnpm_btl.util.error.TicketAlreadyUsedException;
@@ -29,6 +31,8 @@ import static com.dat.cnpm_btl.util.TicketUtil.generateTicketCode;
 public class TicketService {
     private final TicketRepository ticketRepository;
 
+    private final BookingRepository bookingRepository;
+
     private final SeatMapper seatMapper;
 
     private final TicketMapper ticketMapper;
@@ -36,32 +40,33 @@ public class TicketService {
     private final SeatService seatService;
 
     public List<SeatDTO.SeatResponse> getBookedSeatsByShowtimeId(String showtimeId) {
-        List<Seat> bookedSeats = ticketRepository.findSeatsByShowtime_ShowtimeIdAndStatusIn(UUID.fromString(showtimeId),
+        List<Seat> bookedSeats = ticketRepository.findSeatsByShowtime_ShowtimeIdAndStatusIn(showtimeId,
                 List.of(TicketStatus.USED, TicketStatus.PAID));
         return seatMapper.toSeatResponseList(bookedSeats);
     }
 
-    // CREATE - Single ticket
     @Transactional
     public TicketDTO.TicketResponse createTicket(TicketDTO.CreateTicketRequest request) {
         log.info("Creating ticket for booking: {}, showtime: {}, seat: {}",
                 request.getBookingId(), request.getShowtimeId(), request.getSeatId());
 
-        SeatDTO.SeatResponse seat = seatService.getSeatById(request.getSeatId());
+        Seat seat = seatService.getSeatById(request.getSeatId());
 
-        String ticketCode = generateTicketCode(seat.getSeatType().getPrefix());
+        String ticketCode = generateTicketCode(seat.getSeatType().getName());
+
+        Booking booking = bookingRepository.findById(UUID.fromString(request.getBookingId()))
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + request.getBookingId()));
 
         Ticket ticket = Ticket.builder()
-                .bookingId(UUID.fromString(request.getBookingId()))
-                .showtimeId(UUID.fromString(request.getShowtimeId()))
-                .seatId(request.getSeatId())
+                .booking(booking)
+                .seat(seat)
                 .ticketCode(ticketCode)
                 .price(request.getPrice())
                 .status(request.getStatus() != null ? request.getStatus() : TicketStatus.HOLD)
                 .build();
 
         Ticket savedTicket = ticketRepository.save(ticket);
-        log.info("Created ticket with ID: {} and code: {}", savedTicket.getTicketId(), savedTicket.getTicketCode());
+        log.info("Created ticket with ID: {} and code: {}", savedTicket.getId(), savedTicket.getTicketCode());
 
         return ticketMapper.toTicketResponse(savedTicket);
     }
@@ -72,21 +77,22 @@ public class TicketService {
         log.info("Creating {} tickets for booking: {}", request.getSeatIds().size(), request.getBookingId());
 
         List<Ticket> tickets = new ArrayList<>();
-        UUID bookingId = UUID.fromString(request.getBookingId());
-        UUID showtimeId = UUID.fromString(request.getShowtimeId());
 
-        List<SeatDTO.SeatResponse> seatResponses = seatService.getSeatsByIds(request.getSeatIds());
+        Booking booking = bookingRepository.findById(request.getBookingId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + request.getBookingId()));
 
-        for (SeatDTO.SeatResponse seatResponse : seatResponses) {
-            String ticketCode = generateTicketCode(seatResponse.getSeatType().getPrefix());
+        List<Seat> seatResponses = seatService.getSeatsByIds(request.getSeatIds());
+
+        for (Seat seat : seatResponses) {
+            String ticketCode = generateTicketCode(seat.getSeatType().getName());
 
             Ticket ticket = Ticket.builder()
-                    .bookingId(bookingId)
-                    .showtimeId(showtimeId)
-                    .seatId(seatResponse.getSeatId())
+                    .booking(booking)
+                    .seat(seat)
                     .ticketCode(ticketCode)
                     .price(request.getPrice())
                     .status(request.getStatus() != null ? request.getStatus() : TicketStatus.HOLD)
+                    .createdAt(Instant.now())
                     .build();
 
             tickets.add(ticket);
@@ -117,14 +123,14 @@ public class TicketService {
     // READ - Get all tickets by booking ID
     public List<TicketDTO.TicketResponse> getTicketsByBookingId(String bookingId) {
         log.info("Fetching tickets for booking ID: {}", bookingId);
-        List<Ticket> tickets = ticketRepository.findByBookingId(UUID.fromString(bookingId));
+        List<Ticket> tickets = ticketRepository.findByBooking_Id(UUID.fromString(bookingId));
         return ticketMapper.toTicketResponseList(tickets);
     }
 
     // READ - Get all tickets by showtime ID
     public List<TicketDTO.TicketResponse> getTicketsByShowtimeId(String showtimeId) {
         log.info("Fetching tickets for showtime ID: {}", showtimeId);
-        List<Ticket> tickets = ticketRepository.findByShowtimeId(UUID.fromString(showtimeId));
+        List<Ticket> tickets = ticketRepository.findByBooking_Showtime_Id(showtimeId);
         return ticketMapper.toTicketResponseList(tickets);
     }
 
@@ -177,7 +183,7 @@ public class TicketService {
     public List<TicketDTO.TicketResponse> updateTicketStatusByBookingId(String bookingId, TicketStatus newStatus) {
         log.info("Updating all tickets for booking {} to status {}", bookingId, newStatus);
 
-        List<Ticket> tickets = ticketRepository.findByBookingId(UUID.fromString(bookingId));
+        List<Ticket> tickets = ticketRepository.findByBooking_Id(UUID.fromString(bookingId));
 
         if (tickets.isEmpty()) {
             throw new IllegalArgumentException("No tickets found for booking ID: " + bookingId);
@@ -214,7 +220,7 @@ public class TicketService {
     public void deleteTicketsByBookingId(String bookingId) {
         log.info("Deleting all tickets for booking ID: {}", bookingId);
 
-        List<Ticket> tickets = ticketRepository.findByBookingId(UUID.fromString(bookingId));
+        List<Ticket> tickets = ticketRepository.findByBooking_Id(UUID.fromString(bookingId));
 
         if (tickets.isEmpty()) {
             log.warn("No tickets found for booking ID: {}", bookingId);

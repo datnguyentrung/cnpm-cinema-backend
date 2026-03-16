@@ -9,6 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ShowtimeRepository extends JpaRepository<Showtime, UUID> {
+public interface ShowtimeRepository extends JpaRepository<Showtime, String> {
     List<Showtime> findByStartTimeBetween(Instant startTimeAfter, Instant startTimeBefore);
 }

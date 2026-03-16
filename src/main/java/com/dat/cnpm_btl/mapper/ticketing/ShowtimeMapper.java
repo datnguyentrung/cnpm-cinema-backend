@@ -19,6 +19,7 @@ import java.util.List;
 )
 public interface ShowtimeMapper {
 
+    @Mapping(source = "id", target = "showtimeId")
     @Mapping(source = "basePrice", target = "ticketPrice")
     @Mapping(source = "movie", target = "movieResponse")
     @Mapping(source = "room", target = "roomResponse")
@@ -26,7 +27,7 @@ public interface ShowtimeMapper {
 
     List<ShowtimeDTO.ShowtimeResponse> toShowtimeResponseList(List<Showtime> showtimes);
 
-    @Mapping(source = "showtime.showtimeId", target = "showtimeId")
+    @Mapping(source = "showtime.id", target = "showtimeId")
     @Mapping(source = "showtime.movie", target = "movieResponse")
     @Mapping(source = "showtime.room", target = "roomResponse")
     @Mapping(source = "showtime.startTime", target = "startTime")

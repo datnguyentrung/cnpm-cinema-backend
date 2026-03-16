@@ -37,8 +37,14 @@ public class BookingService {
 
     private final ShowtimeWebSocketHandler webSocketHandler;
 
+    public Booking getBookingById(String bookingId) {
+        return bookingRepository.findById(UUID.fromString(bookingId))
+                .orElseThrow(() -> new IllegalArgumentException("Booking with ID " + bookingId + " not found"));
+    }
+
     @Transactional
     public List<TicketDTO.TicketResponse> bookSeats(String showtimeId, List<Integer> seatIds){
+        System.out.println("Attempting to book seats: " + seatIds + " for showtime: " + showtimeId);
         ShowtimeDTO.ShowTimeWithSeatsResponse showtime = showtimeService.getShowtimeWithSeats(showtimeId);
 
         // 1. Chuyển List thành Set (BẮT BUỘC để tối ưu O(1) khi check contains)
@@ -73,21 +79,23 @@ public class BookingService {
 //        String currentUserId = SecurityUtil.getCurrentUserLogin()
 //                .orElseThrow(() -> new IllegalStateException("User not authenticated"));
 
-        String currentUserId = "c0000000-0000-0000-0000-000000000001"; // TODO: Thay bằng userId thực tế khi có auth
+        String currentUserId = "47fe2baa-ce87-4cd0-b809-6ba2e9f8366d"; // TODO: Thay bằng userId thực tế khi có auth
         
         // 5.2. Tạo Booking
         Booking booking = Booking.builder()
-                .userId(UUID.fromString(currentUserId))
+                .user_id(currentUserId)
                 .status(BookingStatus.CONFIRMED) // TODO: Có thể để PENDING nếu muốn thêm bước thanh toán sau này
                 .expiredAt(Instant.now().plus(10, ChronoUnit.MINUTES)) // Giữ ghế 10 phút
+                .createdAt(Instant.now())
+                .showtime_id(showtimeId)
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
-        log.info("Created booking with ID: {} for user: {}", savedBooking.getBookingId(), currentUserId);
+        log.info("Created booking with ID: {} for user: {}", savedBooking.getId(), currentUserId);
 
         // 5.3. Tạo Tickets cho từng ghế
         TicketDTO.BulkCreateTicketRequest ticketRequest = new TicketDTO.BulkCreateTicketRequest();
-        ticketRequest.setBookingId(savedBooking.getBookingId().toString());
+        ticketRequest.setBookingId(savedBooking.getId());
         ticketRequest.setShowtimeId(showtimeId);
         ticketRequest.setSeatIds(seatIds);
         ticketRequest.setPrice(showtime.getTicketPrice()); // Giá từ suất chiếu
@@ -96,7 +104,7 @@ public class BookingService {
         List<TicketDTO.TicketResponse> tickets = ticketService.createTicketsBulk(ticketRequest);
 
         log.info("Successfully created booking {} with {} tickets for showtime {}",
-                savedBooking.getBookingId(), tickets.size(), showtimeId);
+                savedBooking.getId(), tickets.size(), showtimeId);
 
         // Broadcast real-time seat update to all WebSocket clients watching this showtime
         webSocketHandler.broadcastSeatUpdate(showtimeId, seatIds);

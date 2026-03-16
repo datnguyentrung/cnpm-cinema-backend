@@ -24,7 +24,7 @@ public class ShowtimeService {
     private final TicketService ticketService;
 
     public Showtime getShowtimeById(String showtimeId) {
-        return showtimeRepository.findById(UUID.fromString(showtimeId))
+        return showtimeRepository.findById(showtimeId)
                 .orElseThrow(() -> new RuntimeException("Showtime not found with id: " + showtimeId));
     }
 

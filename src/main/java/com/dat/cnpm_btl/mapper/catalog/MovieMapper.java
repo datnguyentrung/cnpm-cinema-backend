@@ -16,7 +16,7 @@ import java.util.UUID;
 )
 public interface MovieMapper {
 
-    @Mapping(source = "movieId", target = "movieId", qualifiedByName = "uuidToString")
+    @Mapping(source = "id", target = "movieId", qualifiedByName = "uuidToString")
     MovieDTO.MovieResponse toMovieResponse(Movie movie);
 
     List<MovieDTO.MovieResponse> toMovieResponseList(List<Movie> movies);

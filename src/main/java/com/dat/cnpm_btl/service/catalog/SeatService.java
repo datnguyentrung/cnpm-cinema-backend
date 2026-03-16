@@ -22,14 +22,13 @@ public class SeatService {
     private final SeatRepository seatRepository;
     private final SeatMapper seatMapper;
 
-    public SeatDTO.SeatResponse getSeatById(Integer seatId) {
+    public Seat getSeatById(Integer seatId) {
         log.info("Fetching seat for seatId: {}", seatId);
-        Seat seat = seatRepository.findById(seatId)
+        return seatRepository.findById(seatId)
                 .orElseThrow(() -> new RuntimeException("Seat not found with id: " + seatId));
-        return seatMapper.toSeatResponse(seat);
     }
 
-    public List<SeatDTO.SeatResponse> getSeatsByIds(List<Integer> seatIds) {
+    public List<Seat> getSeatsByIds(List<Integer> seatIds) {
         log.info("Fetching seats for seatIds: {}", seatIds);
 
         // 1. Validate Input: Tránh trường hợp truyền list rỗng xuống DB
@@ -41,7 +40,7 @@ public class SeatService {
         Set<Integer> uniqueRequestedIds = new HashSet<>(seatIds);
 
         // 3. Query DB với danh sách ID đã deduplicate
-        List<Seat> seats = seatRepository.findBySeatIdIn(new ArrayList<>(uniqueRequestedIds));
+        List<Seat> seats = seatRepository.findByIdIn(new ArrayList<>(uniqueRequestedIds));
 
         // 4. KIỂM TRA LOGIC NGHIỆP VỤ (Vô cùng quan trọng)
         // Nếu số ghế tìm thấy trong DB ít hơn số ID yêu cầu -> Có ghế ma!
@@ -49,7 +48,7 @@ public class SeatService {
 
             // Tìm xem chính xác là ID nào không tồn tại để báo lỗi cho chuẩn
             Set<Integer> foundIds = seats.stream()
-                    .map(Seat::getSeatId)
+                    .map(Seat::getId)
                     .collect(Collectors.toSet());
 
             Set<Integer> missingIds = new HashSet<>(uniqueRequestedIds);
@@ -60,7 +59,7 @@ public class SeatService {
         }
 
         // 5. Mapping và trả về
-        return seatMapper.toSeatResponseList(seats);
+        return seats;
     }
 
     public List<SeatDTO.SeatResponse> getSeatsByRoomId(Integer roomId) {
@@ -71,7 +70,7 @@ public class SeatService {
 
     public List<SeatDTO.SeatResponse> getSeatsByRoomIdAndSeatIds(Integer roomId, List<Integer> seatIds) {
         log.info("Fetching seats for seatIds: {}", seatIds);
-        List<Seat> seats = seatRepository.findByRoomIdAndSeatIdInAndIsActive(roomId, seatIds, true);
+        List<Seat> seats = seatRepository.findByRoomIdAndIdInAndIsActive(roomId, seatIds, true);
         return seatMapper.toSeatResponseList(seats);
     }
 }

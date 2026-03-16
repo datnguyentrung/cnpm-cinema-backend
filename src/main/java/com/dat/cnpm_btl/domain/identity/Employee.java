@@ -1,14 +1,13 @@
 package com.dat.cnpm_btl.domain.identity;
 
+import com.dat.cnpm_btl.domain.catalog.Cinema;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,25 +15,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "employee", // Tên bảng số nhiều, snake_case
-        schema = "identity",
-        indexes = {
-                @Index(name = "idx_employee_cinema", columnList = "cinema_id") // Index để tìm kiếm theo cinema
-        }
-)
+@Table(name = "employee", schema = "identity")
 @PrimaryKeyJoinColumn(name = "user_id")
 @EqualsAndHashCode(callSuper = true) // So sánh object dựa trên cả field của User
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Employee extends User {
 
-    // Nhân viên thuộc rạp nào (Liên kết schema catalog)
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "cinema_id")
-    UUID cinemaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cinema_id")
+    Cinema cinema;
 
-    // Ngày bắt đầu làm việc
     @Column(name = "hire_date")
     LocalDate hireDate;
 
+    @Column(name = "position", length = 100)
+    String position;
+
+    @Column(name = "salary", precision = 10, scale = 2)
+    BigDecimal salary;
 }

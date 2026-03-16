@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -25,12 +24,11 @@ import java.util.UUID;
 @Table(
         name = "ticket",
         schema = "ticketing",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_ticket_showtime_seat", columnNames = {"booking_id", "seat_id"})
+        },
         indexes = {
-                @Index(name = "idx_ticket_booking", columnList = "booking_id"),
-                @Index(name = "idx_ticket_showtime", columnList = "showtime_id"),
-                @Index(name = "idx_ticket_seat", columnList = "seat_id"),
-                @Index(name = "idx_ticket_code", columnList = "ticket_code"),
-                @Index(name = "idx_ticket_status", columnList = "status")
+                @Index(name = "idx_ticket_seat", columnList = "seat_id")
         }
 )
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -40,48 +38,31 @@ public class Ticket {
     @GeneratedValue(generator = "uuid-hibernate-generator")
     @UuidGenerator
     @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "ticket_id", updatable = false, nullable = false)
-    UUID ticketId;
-
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "booking_id", nullable = false)
-    UUID bookingId;
+    @Column(name = "ticket_id", updatable = false, nullable = false, length = 36)
+    UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", referencedColumnName = "booking_id", insertable = false, updatable = false)
+    @JoinColumn(name = "booking_id")
     Booking booking;
 
-    @JdbcTypeCode(SqlTypes.UUID)
-    @Column(name = "showtime_id", nullable = false)
-    UUID showtimeId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "showtime_id", referencedColumnName = "showtime_id", insertable = false, updatable = false)
-    Showtime showtime;
-
-    @Column(name = "seat_id", nullable = false)
-    Integer seatId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_id", referencedColumnName = "seat_id", insertable = false, updatable = false)
+    @JoinColumn(name = "seat_id")
     Seat seat;
 
-    @Column(name = "ticket_code", nullable = false, unique = true)
+    @Column(name = "ticket_code", unique = true)
     String ticketCode; // Mã vé để tạo QR
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "price", precision = 10, scale = 2)
     BigDecimal price; // Giá bán thực tế tại thời điểm mua
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     Instant createdAt; // Thời gian vé được phát hành
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     @Builder.Default
     TicketStatus status = TicketStatus.PAID;
 
     @Column(name = "check_in_time")
     Instant checkInTime; // Thời gian nhân viên quét QR thành công
-
 }

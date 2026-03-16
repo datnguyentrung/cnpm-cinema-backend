@@ -6,3 +6,4 @@ public enum TicketStatus {
     USED, // Vé đã được sử dụng để vào rạp
     CANCELLED // Vé đã bị hủy
 }
+

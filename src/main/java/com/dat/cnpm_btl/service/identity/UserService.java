@@ -27,15 +27,6 @@ public class UserService {
     @Value("${password.time_password_change_days}")
     private long timePasswordChange;
 
-    // Hàm dùng chung để gán thông tin User
-    public <T extends User> void setupBaseUser(T user, String roleCode) {
-        Role role = roleService.getRoleById(roleCode);
-
-        user.setRole(role);
-        user.setPassword(passwordEncoder.encode("123456"));
-        user.setIsActive(true);
-    }
-
     // Lấy user theo idUser
     public User getUserById(String userId) {
         return userRepository.findById(UUID.fromString(userId))
@@ -49,20 +40,5 @@ public class UserService {
     public User getUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
         return (User) userRepository.findByPhoneNumber (phoneNumber)
                 .orElseThrow(() -> new UserNotFoundException("User not found with phone number: " + phoneNumber));
-    }
-
-    public void changePassword(String phoneNumber, ChangePasswordReq passwordReq) {
-        User user = getUserByPhoneNumber(phoneNumber);
-
-        if (!passwordEncoder.matches(passwordReq.getOldPassword(), user.getPassword())) {
-            throw new InvalidPasswordException("Mật khẩu cũ không đúng");
-        }
-
-        if (!passwordReq.getNewPassword().equals(passwordReq.getConfirmPassword())) {
-            throw new InvalidPasswordException("Xác nhận mật khẩu không khớp");
-        }
-
-        user.setPassword(passwordEncoder.encode(passwordReq.getNewPassword()));
-        userRepository.save(user);
     }
 }

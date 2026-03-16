@@ -1,6 +1,5 @@
 package com.dat.cnpm_btl.domain.catalog;
 
-import com.dat.cnpm_btl.enums.catalog.SeatType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,9 +16,6 @@ import lombok.experimental.FieldDefaults;
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_seat_room_row_number", columnNames = {"room_id", "row_label", "seat_number"}),
                 @UniqueConstraint(name = "uk_seat_room_grid", columnNames = {"room_id", "grid_row", "grid_col"})
-        },
-        indexes = {
-                @Index(name = "idx_seat_room", columnList = "room_id")
         }
 )
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -28,32 +24,29 @@ public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seat_id", nullable = false)
-    Integer seatId;
+    Integer id;
 
-    @Column(name = "room_id", nullable = false)
-    Integer roomId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", referencedColumnName = "room_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "room_id", nullable = false)
     Room room;
 
-    @Column(name = "row_label", nullable = false)
+    @Column(name = "row_label", length = 10)
     String rowLabel; // Nhãn hàng (A, B, C...)
 
-    @Column(name = "seat_number", nullable = false)
+    @Column(name = "seat_number")
     Integer seatNumber; // Số ghế theo hàng (1, 2, 3...)
 
-    @Column(name = "grid_row", nullable = false)
+    @Column(name = "grid_row")
     Integer gridRow; // Tọa độ X trên ma trận
 
-    @Column(name = "grid_col", nullable = false)
+    @Column(name = "grid_col")
     Integer gridCol; // Tọa độ Y trên ma trận
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    SeatType type; // Loại ghế (STANDARD, VIP, COUPLE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "seat_type_id", nullable = false)
+    SeatType seatType;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     @Builder.Default
     Boolean isActive = true; // Ghế có sử dụng được không
 

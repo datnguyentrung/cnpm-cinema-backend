@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class TicketDTO {
@@ -87,7 +88,7 @@ public class TicketDTO {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class BulkCreateTicketRequest {
         @NotNull(message = "Booking ID is required")
-        String bookingId;
+        UUID bookingId;
 
         @NotNull(message = "Showtime ID is required")
         String showtimeId;

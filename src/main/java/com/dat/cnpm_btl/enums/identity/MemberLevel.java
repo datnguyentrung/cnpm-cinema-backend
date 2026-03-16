@@ -1,6 +1,6 @@
 package com.dat.cnpm_btl.enums.identity;
 
-public enum Member {
+public enum MemberLevel {
     NORMAL,
     SILVER,
     GOLD,

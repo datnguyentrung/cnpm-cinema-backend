@@ -13,37 +13,29 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "product",
-        schema = "ticketing",
-        indexes = {
-                @Index(name = "idx_product_type", columnList = "type"),
-                @Index(name = "idx_product_active", columnList = "is_active")
-        }
-)
+@Table(name = "product", schema = "ticketing")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", nullable = false)
-    Integer productId;
+    Integer id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     String name; // Tên sản phẩm (VD: Bắp phô mai, Coca lớn)
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(name = "type")
     ProductType type; // Phân loại (FOOD, DRINK, COMBO)
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "price", precision = 10, scale = 2)
     BigDecimal price; // Giá bán niêm yết
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description")
     String description; // Mô tả (VD: Bao gồm 1 Bắp + 2 Nước)
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     @Builder.Default
     Boolean isActive = true; // Còn bán hay ngừng kinh doanh
-
 }
