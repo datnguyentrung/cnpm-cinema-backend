@@ -6,10 +6,14 @@ import com.dat.cnpm_btl.dto.ticketing.ShowtimeDTO;
 import com.dat.cnpm_btl.mapper.catalog.MovieMapper;
 import com.dat.cnpm_btl.mapper.catalog.RoomMapper;
 import com.dat.cnpm_btl.mapper.catalog.SeatMapper;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.time.Duration;
 import java.util.List;
 
 @Mapper(
@@ -25,6 +29,14 @@ public interface ShowtimeMapper {
     @Mapping(source = "room", target = "roomResponse")
     ShowtimeDTO.ShowtimeResponse toShowtimeResponse(Showtime showtime);
 
+    @AfterMapping
+    default void afterToShowtimeResponse(Showtime showtime, @MappingTarget ShowtimeDTO.ShowtimeResponse showtimeResponse) {
+        if (showtime.getStartTime() != null && showtime.getEndTime() != null) {
+            long duration = Duration.between(showtime.getStartTime(), showtime.getEndTime()).toMinutes();
+            showtimeResponse.getMovieResponse().setDurationMinutes((int) duration);
+        }
+    }
+
     List<ShowtimeDTO.ShowtimeResponse> toShowtimeResponseList(List<Showtime> showtimes);
 
     @Mapping(source = "showtime.id", target = "showtimeId")
@@ -39,4 +51,12 @@ public interface ShowtimeMapper {
             Showtime showtime,
             List<SeatDTO.SeatResponse> selectedSeats
     );
+
+    @Named("getDurationInMinutes")
+    default long getDurationInMinutes(Showtime showtime) {
+        if (showtime.getStartTime() == null || showtime.getEndTime() == null) {
+            return 0;
+        }
+        return Duration.between(showtime.getStartTime(), showtime.getEndTime()).toMinutes();
+    }
 }

@@ -4,8 +4,12 @@ import com.dat.cnpm_btl.enums.catalog.AgeRating;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,8 +22,11 @@ import java.time.LocalDate;
 public class Movie {
 
     @Id
+    @GeneratedValue(generator = "uuid-hibernate-generator")
+    @UuidGenerator
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "movie_id", updatable = false, nullable = false, length = 36)
-    String id;
+    UUID id;
 
     @Column(name = "title", nullable = false)
     String title; // Tên phim

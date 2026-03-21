@@ -5,7 +5,6 @@ import com.dat.cnpm_btl.enums.ticketing.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
@@ -44,14 +43,14 @@ public class Booking {
     User user;
 
     @Column(name = "user_id")
-    String user_id;
+    UUID user_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "showtime_id", insertable = false, updatable = false)
     Showtime showtime;
 
     @Column(name = "showtime_id")
-    String showtime_id;
+    UUID showtime_id;
 
     @Column(name = "created_at")
     Instant createdAt; // Thời gian đặt

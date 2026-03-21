@@ -4,10 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,8 +27,11 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
+    @GeneratedValue(generator = "uuid-hibernate-generator")
+    @UuidGenerator
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "user_id", updatable = false, nullable = false, length = 36)
-    String id;
+    UUID id;
 
     @Column(name = "full_name", nullable = false)
     String fullName;

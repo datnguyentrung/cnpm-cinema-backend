@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class MovieGenre {
 
     @Id
     @Column(name = "movie_id", nullable = false, length = 36)
-    String movieId;
+    UUID movieId;
 
     @Id
     @Column(name = "genre_id", nullable = false)
@@ -40,7 +41,7 @@ public class MovieGenre {
     @AllArgsConstructor
     @EqualsAndHashCode
     public static class MovieGenreId implements Serializable {
-        String movieId;
+        UUID movieId;
         Integer genreId;
     }
 

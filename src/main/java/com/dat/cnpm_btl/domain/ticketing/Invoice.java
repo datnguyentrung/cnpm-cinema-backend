@@ -7,10 +7,14 @@ import com.dat.cnpm_btl.enums.ticketing.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -31,8 +35,11 @@ import java.time.Instant;
 public class Invoice {
 
     @Id
+    @GeneratedValue(generator = "uuid-hibernate-generator")
+    @UuidGenerator
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "invoice_id", updatable = false, nullable = false, length = 36)
-    String id;
+    UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")

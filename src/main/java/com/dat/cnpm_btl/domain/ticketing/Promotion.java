@@ -3,9 +3,13 @@ package com.dat.cnpm_btl.domain.ticketing;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,8 +17,11 @@ import java.time.Instant;
 @Table(name = "promotion", schema = "ticketing")
 public class Promotion {
     @Id
+    @GeneratedValue(generator = "uuid-hibernate-generator")
+    @UuidGenerator
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "promotion_id", nullable = false, length = 36)
-    private String id;
+    private UUID id;
 
     @Column(name = "code", unique = true, length = 50)
     private String code;

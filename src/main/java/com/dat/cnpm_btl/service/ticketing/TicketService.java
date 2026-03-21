@@ -11,6 +11,7 @@ import com.dat.cnpm_btl.mapper.ticketing.TicketMapper;
 import com.dat.cnpm_btl.repository.ticketing.BookingRepository;
 import com.dat.cnpm_btl.repository.ticketing.TicketRepository;
 import com.dat.cnpm_btl.service.catalog.SeatService;
+import com.dat.cnpm_btl.util.error.CheckInTimeNotAllowedException;
 import com.dat.cnpm_btl.util.error.TicketAlreadyUsedException;
 import com.dat.cnpm_btl.util.error.TicketNotPaidException;
 import lombok.RequiredArgsConstructor;
@@ -148,6 +149,14 @@ public class TicketService {
 
         Ticket ticket = ticketRepository.findByTicketCode(ticketCode)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found with CODE: " + ticketCode));
+
+        // Kiểm tra thời gian cho phép check-in vé này(ví dụ: trước giờ chiếu 15 phút)
+        Instant now = Instant.now();
+        Instant showtimeStart = ticket.getBooking().getShowtime().getStartTime();
+        if (now.isBefore(showtimeStart.minusSeconds(15 * 60))) {
+            throw new CheckInTimeNotAllowedException(ticketCode, showtimeStart,
+                    ticketMapper.toTicketDetailResponse(ticket));
+        }
 
         TicketStatus currentStatus = ticket.getStatus();
 

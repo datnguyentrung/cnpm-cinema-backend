@@ -103,4 +103,15 @@ public class GlobalException {
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
+
+    @ExceptionHandler(CheckInTimeNotAllowedException.class)
+    public ResponseEntity<RestResponse<Object>> handleCheckInTimeNotAllowed(CheckInTimeNotAllowedException ex) {
+        RestResponse<Object> response = new RestResponse<>();
+        response.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value()); // 422
+        response.setError("CheckInTimeNotAllowedException");
+        response.setMessage("CHECKIN_TIME_NOT_ALLOWED");
+        response.setData(ex.getTicketDetail());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
 }

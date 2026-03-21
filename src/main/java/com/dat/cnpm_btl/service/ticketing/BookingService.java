@@ -80,14 +80,16 @@ public class BookingService {
 //                .orElseThrow(() -> new IllegalStateException("User not authenticated"));
 
         String currentUserId = "47fe2baa-ce87-4cd0-b809-6ba2e9f8366d"; // TODO: Thay bằng userId thực tế khi có auth
-        
+        UUID currentUserUuid = UUID.fromString(currentUserId);
+        UUID showtimeUuid = UUID.fromString(showtimeId);
+
         // 5.2. Tạo Booking
         Booking booking = Booking.builder()
-                .user_id(currentUserId)
+                .user_id(currentUserUuid)
                 .status(BookingStatus.CONFIRMED) // TODO: Có thể để PENDING nếu muốn thêm bước thanh toán sau này
                 .expiredAt(Instant.now().plus(10, ChronoUnit.MINUTES)) // Giữ ghế 10 phút
                 .createdAt(Instant.now())
-                .showtime_id(showtimeId)
+                .showtime_id(showtimeUuid)
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
