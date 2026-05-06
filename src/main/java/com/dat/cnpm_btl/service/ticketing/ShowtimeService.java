@@ -4,7 +4,7 @@ import com.dat.cnpm_btl.domain.ticketing.Showtime;
 import com.dat.cnpm_btl.dto.catalog.SeatDTO;
 import com.dat.cnpm_btl.dto.ticketing.ShowtimeDTO;
 import com.dat.cnpm_btl.mapper.ticketing.ShowtimeMapper;
-import com.dat.cnpm_btl.repository.ticketing.ShowtimeRepository;
+import com.dat.cnpm_btl.dao.ticketing.ShowtimeDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,18 +17,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class ShowtimeService {
-    private final ShowtimeRepository showtimeRepository;
+    private final ShowtimeDAO showtimeDAO;
 
     private final ShowtimeMapper showtimeMapper;
 
     private final TicketService ticketService;
 
-    public Showtime getShowtimeById(String showtimeId) {
-        return showtimeRepository.findById(showtimeId)
+    public Showtime getShowtimeById(UUID showtimeId) {
+        return showtimeDAO.findById(showtimeId)
                 .orElseThrow(() -> new RuntimeException("Showtime not found with id: " + showtimeId));
     }
 
-    public ShowtimeDTO.ShowTimeWithSeatsResponse getShowtimeWithSeats(String showtimeId) {
+    public ShowtimeDTO.ShowTimeWithSeatsResponse getShowtimeWithSeats(UUID showtimeId) {
         Showtime showtimeResponse = getShowtimeById(showtimeId);
 
         List<SeatDTO.SeatResponse> selectedSeats = ticketService.getBookedSeatsByShowtimeId(showtimeId);
@@ -46,7 +46,7 @@ public class ShowtimeService {
 
         System.out.println("Search Range: " + startOfDay + " to " + endOfDay);
 
-        List<Showtime> showtimes = showtimeRepository.findByStartTimeBetween(startOfDay, endOfDay);
+        List<Showtime> showtimes = showtimeDAO.findByStartTimeBetween(startOfDay, endOfDay);
         return showtimeMapper.toShowtimeResponseList(showtimes);
     }
 }

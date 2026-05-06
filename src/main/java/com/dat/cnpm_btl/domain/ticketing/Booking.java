@@ -39,18 +39,12 @@ public class Booking {
     UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id")
     User user;
 
-    @Column(name = "user_id")
-    UUID user_id;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "showtime_id", insertable = false, updatable = false)
+    @JoinColumn(name = "showtime_id")
     Showtime showtime;
-
-    @Column(name = "showtime_id")
-    UUID showtime_id;
 
     @Column(name = "created_at")
     Instant createdAt; // Thời gian đặt

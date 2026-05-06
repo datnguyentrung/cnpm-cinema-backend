@@ -1,5 +1,6 @@
 package com.dat.cnpm_btl.domain.ticketing;
 
+import com.dat.cnpm_btl.enums.ticketing.ProductStatus;
 import com.dat.cnpm_btl.enums.ticketing.ProductType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,7 +36,7 @@ public class Product {
     @Column(name = "description")
     String description; // Mô tả (VD: Bao gồm 1 Bắp + 2 Nước)
 
-    @Column(name = "is_active")
-    @Builder.Default
-    Boolean isActive = true; // Còn bán hay ngừng kinh doanh
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    ProductStatus status; // Thay cho Boolean isActive
 }

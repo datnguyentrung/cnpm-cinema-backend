@@ -91,7 +91,7 @@ public class TicketDTO {
         UUID bookingId;
 
         @NotNull(message = "Showtime ID is required")
-        String showtimeId;
+        UUID showtimeId;
 
         @NotNull(message = "Seat IDs are required")
         List<Integer> seatIds;

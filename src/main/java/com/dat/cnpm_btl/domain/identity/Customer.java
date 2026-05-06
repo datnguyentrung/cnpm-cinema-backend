@@ -23,10 +23,7 @@ public class Customer extends User {
     @Column(name = "registration_date")
     Instant registrationDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "member_level")
-    MemberLevel memberLevel;
-
-    @Column(name = "loyalty_points")
-    Integer loyaltyPoints;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "membership_id", nullable = false)
+    Membership membership;
 }

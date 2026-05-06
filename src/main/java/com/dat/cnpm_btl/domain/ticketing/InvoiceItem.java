@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(
         name = "invoice_item",
+        schema = "ticketing",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_invoice_item_invoice_product", columnNames = {"invoice_id", "product_id"})
         }

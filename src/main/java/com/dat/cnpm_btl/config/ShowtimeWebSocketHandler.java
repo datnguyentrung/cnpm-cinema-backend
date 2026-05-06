@@ -3,6 +3,7 @@ package com.dat.cnpm_btl.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -10,9 +11,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -23,11 +22,11 @@ public class ShowtimeWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
 
     // Map<showtimeId, Set<WebSocketSession>>
-    private final Map<String, Set<WebSocketSession>> showtimeSessions = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<WebSocketSession>> showtimeSessions = new ConcurrentHashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String showtimeId = extractShowtimeId(session);
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
+        UUID showtimeId = extractShowtimeId(session);
 
         showtimeSessions
                 .computeIfAbsent(showtimeId, k -> ConcurrentHashMap.newKeySet())
@@ -47,7 +46,7 @@ public class ShowtimeWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         try {
             Map<?, ?> payload = objectMapper.readValue(message.getPayload(), Map.class);
             String type = (String) payload.get("type");
@@ -65,8 +64,8 @@ public class ShowtimeWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        String showtimeId = extractShowtimeId(session);
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
+        UUID showtimeId = extractShowtimeId(session);
 
         Set<WebSocketSession> sessions = showtimeSessions.get(showtimeId);
         if (sessions != null) {
@@ -89,7 +88,7 @@ public class ShowtimeWebSocketHandler extends TextWebSocketHandler {
      * Broadcast SEATS_UPDATED to all clients watching the given showtime.
      * Called by BookingService after a successful booking.
      */
-    public void broadcastSeatUpdate(String showtimeId, List<Integer> seatIds) {
+    public void broadcastSeatUpdate(UUID showtimeId, List<Integer> seatIds) {
         Set<WebSocketSession> sessions = showtimeSessions.get(showtimeId);
         if (sessions == null || sessions.isEmpty()) {
             log.debug("WS: No active sessions for showtime {}, skipping broadcast", showtimeId);
@@ -124,8 +123,8 @@ public class ShowtimeWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private String extractShowtimeId(WebSocketSession session) {
-        String path = session.getUri().getPath();
-        return path.substring(path.lastIndexOf('/') + 1);
+    private UUID extractShowtimeId(WebSocketSession session) {
+        String path = Objects.requireNonNull(session.getUri()).getPath();
+        return UUID.fromString(path.substring(path.lastIndexOf('/') + 1));
     }
 }

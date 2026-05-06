@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -18,7 +19,7 @@ public class ShowtimeController {
     private final ShowtimeService showtimeService;
 
     @GetMapping("/{showtimeId}")
-    public ResponseEntity<ShowtimeDTO.ShowTimeWithSeatsResponse> getShowtimeWithSeats(@PathVariable String showtimeId) {
+    public ResponseEntity<ShowtimeDTO.ShowTimeWithSeatsResponse> getShowtimeWithSeats(@PathVariable UUID showtimeId) {
         log.info("Getting showtime with seats for showtimeId: {}", showtimeId);
         ShowtimeDTO.ShowTimeWithSeatsResponse response = showtimeService.getShowtimeWithSeats(showtimeId);
         return ResponseEntity.ok(response);

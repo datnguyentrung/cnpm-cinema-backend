@@ -1,4 +1,4 @@
-package com.dat.cnpm_btl.repository.identity;
+package com.dat.cnpm_btl.dao.identity;
 
 import com.dat.cnpm_btl.domain.identity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserDAO extends JpaRepository<User, UUID> {
     Optional<User> findByPhoneNumber(String phoneNumber);
 }

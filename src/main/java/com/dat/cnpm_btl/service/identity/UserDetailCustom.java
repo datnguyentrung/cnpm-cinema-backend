@@ -1,6 +1,7 @@
 package com.dat.cnpm_btl.service.identity;
 
 import com.dat.cnpm_btl.domain.identity.User;
+import com.dat.cnpm_btl.enums.identity.UserStatus;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,8 +34,8 @@ public class UserDetailCustom implements UserDetailsService {
         }
 
         // Check if user account is active and not banned/deactivated
-        boolean isAccountNonLocked = user.getIsActive() != Boolean.FALSE;
-        boolean isEnabled = user.getIsActive() == Boolean.TRUE;
+        boolean isAccountNonLocked = user.getStatus() != UserStatus.INACTIVE;
+        boolean isEnabled = user.getStatus() == UserStatus.ACTIVE;
 
         // Build authorities from user role (Role.code already contains "ROLE_" prefix)
         SimpleGrantedAuthority authority = user.getRole() != null

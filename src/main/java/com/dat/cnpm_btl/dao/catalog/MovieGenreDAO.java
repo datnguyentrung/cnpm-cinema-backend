@@ -1,9 +1,9 @@
-package com.dat.cnpm_btl.repository.catalog;
+package com.dat.cnpm_btl.dao.catalog;
 
 import com.dat.cnpm_btl.domain.catalog.MovieGenre;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MovieGenreRepository extends JpaRepository<MovieGenre, MovieGenre.MovieGenreId> {
+public interface MovieGenreDAO extends JpaRepository<MovieGenre, MovieGenre.MovieGenreId> {
 }

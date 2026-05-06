@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class BookingDTO {
@@ -15,7 +16,7 @@ public class BookingDTO {
     @AllArgsConstructor
     public static class BookSeatsRequest {
         @NotNull(message = "Showtime ID is required")
-        private String showtimeId;
+        private UUID showtimeId;
 
         @NotEmpty(message = "Seat IDs list cannot be empty")
         private List<Integer> seatIds;

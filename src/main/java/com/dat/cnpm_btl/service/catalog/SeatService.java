@@ -3,7 +3,7 @@ package com.dat.cnpm_btl.service.catalog;
 import com.dat.cnpm_btl.domain.catalog.Seat;
 import com.dat.cnpm_btl.dto.catalog.SeatDTO;
 import com.dat.cnpm_btl.mapper.catalog.SeatMapper;
-import com.dat.cnpm_btl.repository.catalog.SeatRepository;
+import com.dat.cnpm_btl.dao.catalog.SeatDAO;
 import com.dat.cnpm_btl.util.error.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class SeatService {
-    private final SeatRepository seatRepository;
+    private final SeatDAO seatDAO;
     private final SeatMapper seatMapper;
 
     public Seat getSeatById(Integer seatId) {
         log.info("Fetching seat for seatId: {}", seatId);
-        return seatRepository.findById(seatId)
+        return seatDAO.findById(seatId)
                 .orElseThrow(() -> new RuntimeException("Seat not found with id: " + seatId));
     }
 
@@ -40,7 +40,7 @@ public class SeatService {
         Set<Integer> uniqueRequestedIds = new HashSet<>(seatIds);
 
         // 3. Query DB với danh sách ID đã deduplicate
-        List<Seat> seats = seatRepository.findByIdIn(new ArrayList<>(uniqueRequestedIds));
+        List<Seat> seats = seatDAO.findByIdIn(new ArrayList<>(uniqueRequestedIds));
 
         // 4. KIỂM TRA LOGIC NGHIỆP VỤ (Vô cùng quan trọng)
         // Nếu số ghế tìm thấy trong DB ít hơn số ID yêu cầu -> Có ghế ma!
@@ -64,13 +64,13 @@ public class SeatService {
 
     public List<SeatDTO.SeatResponse> getSeatsByRoomId(Integer roomId) {
         log.info("Fetching seats for roomId: {}", roomId);
-        List<Seat> seats = seatRepository.findByRoomIdAndIsActive(roomId, true);
+        List<Seat> seats = seatDAO.findByRoomIdAndIsActive(roomId, true);
         return seatMapper.toSeatResponseList(seats);
     }
 
     public List<SeatDTO.SeatResponse> getSeatsByRoomIdAndSeatIds(Integer roomId, List<Integer> seatIds) {
         log.info("Fetching seats for seatIds: {}", seatIds);
-        List<Seat> seats = seatRepository.findByRoomIdAndIdInAndIsActive(roomId, seatIds, true);
+        List<Seat> seats = seatDAO.findByRoomIdAndIdInAndIsActive(roomId, seatIds, true);
         return seatMapper.toSeatResponseList(seats);
     }
 }

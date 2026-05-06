@@ -1,5 +1,6 @@
 package com.dat.cnpm_btl.domain.identity;
 
+import com.dat.cnpm_btl.enums.identity.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -52,9 +53,9 @@ public class User {
     LocalDate birthDate;
 
     // Trạng thái kích hoạt, mặc định là true khi tạo mới (tùy logic của bạn)
-    @Column(name = "is_active")
-    @Builder.Default
-    Boolean isActive = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    UserStatus status; // Cần tạo thêm Enum UserStatus (ACTIVE, INACTIVE,...)
 
     // --- QUAN HỆ VỚI BẢNG ROLE ---
     @ManyToOne(fetch = FetchType.LAZY)

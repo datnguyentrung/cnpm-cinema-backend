@@ -1,16 +1,18 @@
 package com.dat.cnpm_btl.service.ticketing;
 
 import com.dat.cnpm_btl.config.ShowtimeWebSocketHandler;
+import com.dat.cnpm_btl.domain.identity.User;
 import com.dat.cnpm_btl.domain.ticketing.Booking;
+import com.dat.cnpm_btl.domain.ticketing.Showtime;
 import com.dat.cnpm_btl.dto.catalog.SeatDTO;
 import com.dat.cnpm_btl.dto.ticketing.ShowtimeDTO;
 import com.dat.cnpm_btl.dto.ticketing.TicketDTO;
 import com.dat.cnpm_btl.enums.ticketing.BookingStatus;
 import com.dat.cnpm_btl.enums.ticketing.TicketStatus;
-import com.dat.cnpm_btl.repository.ticketing.BookingRepository;
+import com.dat.cnpm_btl.dao.ticketing.BookingDAO;
 import com.dat.cnpm_btl.service.catalog.SeatService;
+import com.dat.cnpm_btl.service.identity.UserService;
 import com.dat.cnpm_btl.util.SeatValidationUtil;
-import com.dat.cnpm_btl.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BookingService {
-    private final BookingRepository bookingRepository;
+    private final BookingDAO bookingDAO;
 
     private final ShowtimeService showtimeService;
 
@@ -36,14 +38,15 @@ public class BookingService {
     private final SeatService seatService;
 
     private final ShowtimeWebSocketHandler webSocketHandler;
+    private final UserService userService;
 
     public Booking getBookingById(String bookingId) {
-        return bookingRepository.findById(UUID.fromString(bookingId))
+        return bookingDAO.findById(UUID.fromString(bookingId))
                 .orElseThrow(() -> new IllegalArgumentException("Booking with ID " + bookingId + " not found"));
     }
 
     @Transactional
-    public List<TicketDTO.TicketResponse> bookSeats(String showtimeId, List<Integer> seatIds){
+    public List<TicketDTO.TicketResponse> bookSeats(UUID showtimeId, List<Integer> seatIds){
         System.out.println("Attempting to book seats: " + seatIds + " for showtime: " + showtimeId);
         ShowtimeDTO.ShowTimeWithSeatsResponse showtime = showtimeService.getShowtimeWithSeats(showtimeId);
 
@@ -79,20 +82,22 @@ public class BookingService {
 //        String currentUserId = SecurityUtil.getCurrentUserLogin()
 //                .orElseThrow(() -> new IllegalStateException("User not authenticated"));
 
-        String currentUserId = "47fe2baa-ce87-4cd0-b809-6ba2e9f8366d"; // TODO: Thay bằng userId thực tế khi có auth
-        UUID currentUserUuid = UUID.fromString(currentUserId);
-        UUID showtimeUuid = UUID.fromString(showtimeId);
+        String currentUserId = "79208501-4e07-46ba-9d2c-9bdcb858dbea"; // TODO: Thay bằng userId thực tế khi có auth
+
+        User user = userService.getUserById(currentUserId);
+
+        Showtime showtimeEntity = showtimeService.getShowtimeById(showtimeId);
 
         // 5.2. Tạo Booking
         Booking booking = Booking.builder()
-                .user_id(currentUserUuid)
                 .status(BookingStatus.CONFIRMED) // TODO: Có thể để PENDING nếu muốn thêm bước thanh toán sau này
                 .expiredAt(Instant.now().plus(10, ChronoUnit.MINUTES)) // Giữ ghế 10 phút
                 .createdAt(Instant.now())
-                .showtime_id(showtimeUuid)
+                .showtime(showtimeEntity)
+                .user(user)
                 .build();
 
-        Booking savedBooking = bookingRepository.save(booking);
+        Booking savedBooking = bookingDAO.save(booking);
         log.info("Created booking with ID: {} for user: {}", savedBooking.getId(), currentUserId);
 
         // 5.3. Tạo Tickets cho từng ghế
